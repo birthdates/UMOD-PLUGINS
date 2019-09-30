@@ -7,21 +7,22 @@ namespace Oxide.Plugins
     public class CactusDamage : RustPlugin
     {
         #region Hooks
-        void Init() => LoadConfig();
 
-        void OnDispenserGather(ResourceDispenser dispenser, BasePlayer entity)
+        private void Init() => LoadConfig();
+
+        private void OnDispenserGather(ResourceDispenser dispenser, BasePlayer entity)
         {
             if (!dispenser.name.Contains("cactus")) return;
             Hurt(entity, _config.harvestingDamage, dispenser.GetComponent<BaseEntity>() ?? entity);
         }
 
-        void OnEntityTakeDamage(BasePlayer entity, HitInfo info)
+        private void OnEntityTakeDamage(BasePlayer entity, HitInfo info)
         {
             if(info.Initiator?.ShortPrefabName.Contains("cactus") == false || info.damageTypes.Get(Rust.DamageType.Slash) > 0 || info.damageTypes.Get(Rust.DamageType.Bleeding) > 0) return;
             Hurt(entity, _config.collisionDamage, info.Initiator ?? entity);
         }
 
-        void Hurt(BasePlayer Player, Damage Damage, BaseEntity Initiator)
+        private static void Hurt(BasePlayer Player, Damage Damage, BaseEntity Initiator)
         {
             var Amount = Core.Random.Range(Damage.MinDamage, Damage.MaxDamage);
             Player.Hurt(Amount, Rust.DamageType.Slash, Initiator);
