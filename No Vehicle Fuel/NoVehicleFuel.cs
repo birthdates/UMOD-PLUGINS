@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("No Vehicle Fuel", "birthdates", "2.0.1")]
+    [Info("No Vehicle Fuel", "birthdates", "2.0.2")]
     [Description("No fuel needed for boats and rhibs.")]
     public class NoVehicleFuel : RustPlugin
     {
