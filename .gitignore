@@ -1,3 +1,4 @@
 *.csproj
 obj/
 bin/
+.gitignore
