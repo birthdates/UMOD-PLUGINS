@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Oxide.Plugins
 {
-    [Info("CupboardProtection", "Wulf/lukespragg and birthdates", "1.5.0")]
+    [Info("CupboardProtection", "Wulf/lukespragg and birthdates", "1.5.1")]
     [Description("Makes cupboards and their foundations invulnerable, unable to be destroyed.")]
 
     public class CupboardProtection : RustPlugin

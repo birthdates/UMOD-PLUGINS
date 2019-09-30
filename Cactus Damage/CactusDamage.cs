@@ -2,7 +2,7 @@
 
 namespace Oxide.Plugins
 {
-    [Info("Cactus Damage", "birthdates", "1.1.0")]
+    [Info("Cactus Damage", "birthdates", "1.1.1")]
     [Description("Cacti deal damage to players harvesting/colliding with them.")]
     public class CactusDamage : RustPlugin
     {
