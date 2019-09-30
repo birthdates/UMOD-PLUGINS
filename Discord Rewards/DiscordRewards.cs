@@ -11,7 +11,7 @@ using Oxide.Ext.Discord.Exceptions;
 
 namespace Oxide.Plugins
 {
-    [Info("Discord Rewards", "birthdates", "1.1.3")]
+    [Info("Discord Rewards", "birthdates", "1.1.4")]
     [Description("Get rewards for joining a discord!")]
     public class DiscordRewards : CovalencePlugin
     {

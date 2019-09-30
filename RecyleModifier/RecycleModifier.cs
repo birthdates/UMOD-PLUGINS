@@ -7,9 +7,38 @@ namespace Oxide.Plugins
     [Description("Ability to change the output of the recycler")]
     public class RecycleModifier : RustPlugin
     {
+
+        #region Hooks
+        
+        private void Init() => LoadConfig();
+
+        private object OnRecycleItem(Recycler recycler, Item item)
+        {
+            if (config.bAP.Contains(item.info.shortname))
+            {
+                return null;
+            }
+            recycler.inventory?.Remove(item);
+            foreach (var i in item.info.Blueprint.ingredients)
+            {
+                i.amount /= 2;
+                i.amount *= config.mod;
+                i.amount *= item.amount;
+                var z = ItemManager.Create(i.itemDef, Convert.ToInt32(i.amount));
+                if(z == null) continue;
+                recycler.MoveItemToOutput(z);
+
+            }
+            return false;
+        }
+
+        #endregion
+
+        #region Configuration
+
         private ConfigFile config;
 
-        class ConfigFile
+        private class ConfigFile
         {
             [JsonProperty("Blacklisted items (wont get the modifier)")]
             public List<string> bAP;
@@ -27,32 +56,8 @@ namespace Oxide.Plugins
                         "rock",
                         "locker"
                     }
-
                 };
             }
-
-        }
-
-        object OnRecycleItem(Recycler recycler, Item item)
-        {
-
-            if (config.bAP.Contains(item.info.shortname))
-            {
-                return null;
-            }
-            recycler.inventory?.Remove(item);
-            foreach (var i in item.info.Blueprint.ingredients)
-            {
-                i.amount /= 2;
-                i.amount *= config.mod;
-                i.amount *= item.amount;
-                var z = ItemManager.Create(i.itemDef, Convert.ToInt32(i.amount));
-                if(z == null) continue;
-                recycler.MoveItemToOutput(z);
-
-            }
-            return false;
-
         }
 
         protected override void LoadConfig()
@@ -65,8 +70,7 @@ namespace Oxide.Plugins
                 LoadDefaultConfig();
             }
         }
-
-
+        
         protected override void LoadDefaultConfig()
         {
             config = ConfigFile.DefaultConfig();
@@ -81,19 +85,8 @@ namespace Oxide.Plugins
             }, this);
         }
 
+        protected override void SaveConfig() => Config.WriteObject(config);
 
-
-        protected override void SaveConfig()
-        {
-            Config.WriteObject(config);
-        }
-
-        private void Init()
-        {
-            LoadConfig();
-        }
-
-
-
+        #endregion
     }
 }

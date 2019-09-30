@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
-using static BaseEntity;
 
 namespace Oxide.Plugins
 {
@@ -15,9 +13,9 @@ namespace Oxide.Plugins
         private const string permission_copter = "novehiclefuel.copter";
         public static NoVehicleFuel Ins;
 
-        private List<FuelVehicle> cachedVehicles = new List<FuelVehicle>();
+        private readonly List<FuelVehicle> cachedVehicles = new List<FuelVehicle>();
 
-        private Dictionary<string, string> PrefabToPermission = new Dictionary<string, string>
+        private readonly Dictionary<string, string> PrefabToPermission = new Dictionary<string, string>
         {
             {"assets/content/vehicles/boats/rowboat/rowboat.prefab", permission_boat},
             {"assets/content/vehicles/minicopter/minicopter.entity.prefab", permission_copter}
@@ -29,7 +27,7 @@ namespace Oxide.Plugins
             private BaseEntity Vehicle;
             private StorageContainer FuelTank;
 
-            void Awake()
+            private void Awake()
             {
                 Vehicle = GetComponent<BaseEntity>();
                 if (Vehicle == null) End();
@@ -88,9 +86,9 @@ namespace Oxide.Plugins
             Ins = this;
         }
 
-        void OnServerInitialized() => SetupMounted();
+        private void OnServerInitialized() => SetupMounted();
 
-        void SetupMounted()
+        private void SetupMounted()
         {
             foreach (var Entity in BaseNetworkable.serverEntities)
             {
@@ -104,7 +102,7 @@ namespace Oxide.Plugins
             }
         }
 
-        void Unload()
+        private void Unload()
         {
             foreach (var Vehicle in cachedVehicles)
             {
@@ -112,7 +110,7 @@ namespace Oxide.Plugins
             }
         }
 
-        void OnEntityMounted(BaseMountable entity, BasePlayer player)
+        private void OnEntityMounted(BaseMountable entity, BasePlayer player)
         {
             var Entity = entity.GetParentEntity();
             if (Entity == null) return;
@@ -125,14 +123,14 @@ namespace Oxide.Plugins
             Entity.gameObject.AddComponent<FuelVehicle>();
         }
 
-        void OnEntityDismounted(BaseMountable entity, BasePlayer player)
+        private void OnEntityDismounted(BaseMountable entity, BasePlayer player)
         {
             var FuelVehicle = entity.GetComponent<FuelVehicle>();
             if (!FuelVehicle) return;
             FuelVehicle.End(true);
         }
 
-        object CanLootEntity(BasePlayer player, StorageContainer container)
+        private object CanLootEntity(BasePlayer player, StorageContainer container)
         {
             var Parent = container.GetParentEntity();
             if (Parent == null) return null;
@@ -141,7 +139,7 @@ namespace Oxide.Plugins
             return null;
         }
 
-        void OnItemRemovedFromContainer(ItemContainer container, Item item)
+        private void OnItemRemovedFromContainer(ItemContainer container, Item item)
         {
             var Parent = container.entityOwner?.GetParentEntity();
 

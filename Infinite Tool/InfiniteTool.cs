@@ -1,6 +1,6 @@
 ﻿namespace Oxide.Plugins
 {
-    [Info("Infinite Tool", "birthdates", "2.0.1")]
+    [Info("Infinite Tool", "birthdates", "2.0.2")]
     [Description("Allows player with permission to obtain unlimited ammo / durability")]
     public class InfiniteTool : RustPlugin
     {
@@ -24,7 +24,7 @@
         }
         #endregion
 
-        void OnWeaponFired(BaseProjectile projectile, BasePlayer player)
+        private void OnWeaponFired(BaseProjectile projectile, BasePlayer player)
         {
             if(!player.IPlayer.HasPermission(permission_ammo)) return;
             if(projectile.primaryMagazine.contents != 1) return;
@@ -32,7 +32,7 @@
             projectile.SendNetworkUpdateImmediate();
         }
 
-        void OnExplosiveThrown(BasePlayer player)
+        private void OnExplosiveThrown(BasePlayer player)
         {
             if(!player.IPlayer.HasPermission(permission_explosives)) return;
             if(player.GetActiveItem()?.info.shortname.Contains("signal") == true) return;
@@ -41,12 +41,12 @@
             weapon.GetItem().amount += 1;
         }
 
-        void OnLoseCondition(Item item, ref float amount)
+        private void OnLoseCondition(Item item, ref float amount)
         {
             if(item?.GetOwnerPlayer()?.IPlayer?.HasPermission(permission_durability) == true) amount = 0f;
         }
 
-        void OnRocketLaunched(BasePlayer player)
+        private void OnRocketLaunched(BasePlayer player)
         {
             if(!player.IPlayer.HasPermission(permission_rockets)) return;
             var weapon = player.GetActiveItem().GetHeldEntity() as BaseProjectile;
