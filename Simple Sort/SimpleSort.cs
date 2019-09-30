@@ -59,7 +59,7 @@ namespace Oxide.Plugins
 
         private void OnLootEntityEnd(BasePlayer player) => CloseUI(player);
 
-        private void CloseUI(BasePlayer Player) => CuiHelper.DestroyUi(Player, "SimpleSortUI");
+        private static void CloseUI(BasePlayer Player) => CuiHelper.DestroyUi(Player, "SimpleSortUI");
 
         private void OpenUI(BasePlayer Player)
         {
@@ -68,7 +68,7 @@ namespace Oxide.Plugins
         }
 
         [ConsoleCommand("SimpleSort:Sort")]
-        void ConsoleCommand(ConsoleSystem.Arg Arg)
+        private void ConsoleCommand(ConsoleSystem.Arg Arg)
         {
             var Player = Arg.Player();
             if (!Player || !Player.IPlayer.HasPermission(permission_use) || Player.inventory.loot.containers.Count < 1) return;
@@ -125,7 +125,7 @@ namespace Oxide.Plugins
             }
         }
 
-        private string ToUnityColor(string hexColor)
+        private static string ToUnityColor(string hexColor)
         {
             var BaseColor = new Color();
             return !ColorUtility.TryParseHtmlString(hexColor, out BaseColor) ? "1 1 1 1" : $"{BaseColor.r} {BaseColor.g} {BaseColor.b} {BaseColor.a}";
