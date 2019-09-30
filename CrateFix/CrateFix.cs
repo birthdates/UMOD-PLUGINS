@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Oxide.Plugins
@@ -9,12 +8,9 @@ namespace Oxide.Plugins
     public class CrateFix : RustPlugin
     {
         #region Hooks
-        private void Init()
-        {
-            LoadConfig();
-        }
+        private void Init() => LoadConfig();
 
-        object CanAcceptItem(ItemContainer container, Item item, int targetPos)
+        private object CanAcceptItem(ItemContainer container, Item item, int targetPos)
         {
             var Entity = container.entityOwner;
             if (Entity == null) return null;
