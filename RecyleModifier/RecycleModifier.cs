@@ -1,23 +1,23 @@
-﻿﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+
 namespace Oxide.Plugins
 {
     [Info("Recycle Modifier", "birthdates", "1.0.2")]
     [Description("Ability to change the output of the recycler")]
     public class RecycleModifier : RustPlugin
     {
-
         #region Hooks
-        
-        private void Init() => LoadConfig();
+
+        private void Init()
+        {
+            LoadConfig();
+        }
 
         private object OnRecycleItem(Recycler recycler, Item item)
         {
-            if (config.bAP.Contains(item.info.shortname))
-            {
-                return null;
-            }
+            if (config.bAP.Contains(item.info.shortname)) return null;
             recycler.inventory?.Remove(item);
             foreach (var i in item.info.Blueprint.ingredients)
             {
@@ -25,10 +25,10 @@ namespace Oxide.Plugins
                 i.amount *= config.mod;
                 i.amount *= item.amount;
                 var z = ItemManager.Create(i.itemDef, Convert.ToInt32(i.amount));
-                if(z == null) continue;
+                if (z == null) continue;
                 recycler.MoveItemToOutput(z);
-
             }
+
             return false;
         }
 
@@ -43,15 +43,14 @@ namespace Oxide.Plugins
             [JsonProperty("Blacklisted items (wont get the modifier)")]
             public List<string> bAP;
 
-            [JsonProperty("Modifier")]
-            public int mod;
+            [JsonProperty("Modifier")] public int mod;
 
             public static ConfigFile DefaultConfig()
             {
-                return new ConfigFile()
+                return new ConfigFile
                 {
                     mod = 2,
-                    bAP = new List<string>()
+                    bAP = new List<string>
                     {
                         "rock",
                         "locker"
@@ -65,12 +64,9 @@ namespace Oxide.Plugins
             base.LoadConfig();
 
             config = Config.ReadObject<ConfigFile>();
-            if (config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (config == null) LoadDefaultConfig();
         }
-        
+
         protected override void LoadDefaultConfig()
         {
             config = ConfigFile.DefaultConfig();
@@ -81,11 +77,14 @@ namespace Oxide.Plugins
         {
             lang.RegisterMessages(new Dictionary<string, string>
             {
-                {"NoPermission", "You don't have any permission."},
+                {"NoPermission", "You don't have any permission."}
             }, this);
         }
 
-        protected override void SaveConfig() => Config.WriteObject(config);
+        protected override void SaveConfig()
+        {
+            Config.WriteObject(config);
+        }
 
         #endregion
     }

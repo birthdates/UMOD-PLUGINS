@@ -8,6 +8,7 @@ using Oxide.Ext.Discord.Attributes;
 using Oxide.Ext.Discord.DiscordEvents;
 using Oxide.Ext.Discord.DiscordObjects;
 using Oxide.Ext.Discord.Exceptions;
+using Random = System.Random;
 
 namespace Oxide.Plugins
 {
@@ -16,13 +17,16 @@ namespace Oxide.Plugins
     public class DiscordRewards : CovalencePlugin
     {
         #region Variables
-        [DiscordClient] DiscordClient Client;
+
+        [DiscordClient] private DiscordClient Client;
         private Role role;
         private const string Perm = "discordrewards.use";
         private Data data;
+
         #endregion
 
         #region Hooks
+
         private void Init()
         {
             LoadConfig();
@@ -43,7 +47,10 @@ namespace Oxide.Plugins
             }
         }
 
-        private void Discord_Ready(Ready ready) => role = Client?.DiscordServer?.roles?.Find(a => a.id.Equals(_config.role) || a.name.Equals(_config.role));
+        private void Discord_Ready(Ready ready)
+        {
+            role = Client?.DiscordServer?.roles?.Find(a => a.id.Equals(_config.role) || a.name.Equals(_config.role));
+        }
 
         private void ChatCMD(IPlayer player, string command, string[] args)
         {
@@ -58,21 +65,26 @@ namespace Oxide.Plugins
                 player.Message(lang.GetMessage("AlreadyVerified", this, player.Id));
                 return;
             }
+
             if (data.codes.ContainsValue(player.Id))
             {
-                player.Message(string.Format(lang.GetMessage("YouAlreadyHaveACodeOut", this, player.Id), data.codes.First(x => x.Value == player.Id).Key));
+                player.Message(string.Format(lang.GetMessage("YouAlreadyHaveACodeOut", this, player.Id),
+                    data.codes.First(x => x.Value == player.Id).Key));
                 return;
             }
+
             var code = RandomString(_config.codeLength);
             data.codes.Add(code, player.Id);
             player.Message(string.Format(lang.GetMessage("Verify", this, player.Id), code));
         }
-        private readonly System.Random random = new System.Random();
+
+        private readonly Random random = new Random();
+
         public string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
             return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
 
@@ -83,6 +95,7 @@ namespace Oxide.Plugins
                 PrintError("Discord bot not connected correcty!");
                 return;
             }
+
             Puts("Discord bot connected!");
         }
 
@@ -91,30 +104,29 @@ namespace Oxide.Plugins
             if (message.author.bot == true) return;
             Channel.GetChannel(Client, message.channel_id, c =>
             {
-            if (c.type != ChannelType.DM)
-                return;
-            if (data.verified2.Contains(message.author.id))
-            {
-                message.Reply(Client, lang.GetMessage("AlreadyVerified", this));
-                return;
-            }
-            if (!data.codes.ContainsKey(message.content))
-            {
-                message.Reply(Client, lang.GetMessage("NotAValidCode", this));
-                return;
-            }
-            var p = players.FindPlayer(data.codes[message.content]);
-            data.verified.Add(p.Id);
-            data.verified2.Add(message.author.id);
-            foreach (var s in _config.commands)
-            {
-                server.Command(string.Format(s, p.Id));
-            }
-            message.Reply(Client, lang.GetMessage("Success", this));
-            data.codes.Remove(message.content);
-            p.Message(lang.GetMessage("VerifiedInGame", this, p.Id));
-            SaveData();
-            if(role != null) Client.DiscordServer.AddGuildMemberRole(Client, message.author.id, role.id);
+                if (c.type != ChannelType.DM)
+                    return;
+                if (data.verified2.Contains(message.author.id))
+                {
+                    message.Reply(Client, lang.GetMessage("AlreadyVerified", this));
+                    return;
+                }
+
+                if (!data.codes.ContainsKey(message.content))
+                {
+                    message.Reply(Client, lang.GetMessage("NotAValidCode", this));
+                    return;
+                }
+
+                var p = players.FindPlayer(data.codes[message.content]);
+                data.verified.Add(p.Id);
+                data.verified2.Add(message.author.id);
+                foreach (var s in _config.commands) server.Command(string.Format(s, p.Id));
+                message.Reply(Client, lang.GetMessage("Success", this));
+                data.codes.Remove(message.content);
+                p.Message(lang.GetMessage("VerifiedInGame", this, p.Id));
+                SaveData();
+                if (role != null) Client.DiscordServer.AddGuildMemberRole(Client, message.author.id, role.id);
             });
         }
 
@@ -127,6 +139,7 @@ namespace Oxide.Plugins
         #endregion
 
         #region Configuration & Language
+
         public ConfigFile _config;
 
         protected override void LoadDefaultMessages()
@@ -143,30 +156,37 @@ namespace Oxide.Plugins
             }, this);
         }
 
-        private void SaveData() => Interface.Oxide.DataFileSystem.WriteObject("Discord Rewards", data);
+        private void SaveData()
+        {
+            Interface.Oxide.DataFileSystem.WriteObject("Discord Rewards", data);
+        }
 
         public class Data
         {
-            public List<string> verified2 = new List<string>();
-            public List<string> verified = new List<string>();
             public Dictionary<string, string> codes = new Dictionary<string, string>();
+            public List<string> verified = new List<string>();
+            public List<string> verified2 = new List<string>();
         }
 
         public class ConfigFile
         {
-            [JsonProperty("Command")]
-            public string command;
             [JsonProperty("Discord bot key (Look at documentation for how to get this)")]
             public string botKey;
-            [JsonProperty("Verification Role (role given when verified)")]
-            public string role;
-            [JsonProperty("Commands to execute when player is verified (use {0} for the player's steamid)")]
-            public List<string> commands;
+
             [JsonProperty("Amount of characters in the code")]
             public int codeLength;
+
+            [JsonProperty("Command")] public string command;
+
+            [JsonProperty("Commands to execute when player is verified (use {0} for the player's steamid)")]
+            public List<string> commands;
+
+            [JsonProperty("Verification Role (role given when verified)")]
+            public string role;
+
             public static ConfigFile DefaultConfig()
             {
-                return new ConfigFile()
+                return new ConfigFile
                 {
                     command = "verify",
                     botKey = "INSERT_BOT_KEY_HERE",
@@ -175,7 +195,7 @@ namespace Oxide.Plugins
                     {
                         "inventory.giveto {0} stones 1000"
                     },
-                    codeLength = 6,
+                    codeLength = 6
                 };
             }
         }
@@ -184,10 +204,7 @@ namespace Oxide.Plugins
         {
             base.LoadConfig();
             _config = Config.ReadObject<ConfigFile>();
-            if (_config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (_config == null) LoadDefaultConfig();
         }
 
         protected override void LoadDefaultConfig()
@@ -195,10 +212,12 @@ namespace Oxide.Plugins
             _config = ConfigFile.DefaultConfig();
             PrintWarning("Default configuration has been loaded.");
         }
+
         protected override void SaveConfig()
         {
             Config.WriteObject(_config);
         }
+
         #endregion
     }
 }

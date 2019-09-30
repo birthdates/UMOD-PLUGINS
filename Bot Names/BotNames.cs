@@ -9,7 +9,10 @@ namespace Oxide.Plugins
     {
         #region Hooks
 
-        private void Init() => LoadConfig();
+        private void Init()
+        {
+            LoadConfig();
+        }
 
         private void OnEntitySpawned(BasePlayer Player)
         {
@@ -17,6 +20,7 @@ namespace Oxide.Plugins
             Player.displayName = _config.Names.GetRandom();
             Player.UpdatePlayerCollider(true);
         }
+
         #endregion
 
         #region Configuration, Language & Data
@@ -25,30 +29,31 @@ namespace Oxide.Plugins
 
         private class ConfigFile
         {
-            public readonly List<string> Names = new List<string>()
+            public readonly List<string> Names = new List<string>
             {
                 ":(",
                 ":D"
             };
         }
-        
+
         protected override void LoadConfig()
         {
             base.LoadConfig();
             _config = Config.ReadObject<ConfigFile>();
-            if(_config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (_config == null) LoadDefaultConfig();
         }
-    
+
         protected override void LoadDefaultConfig()
         {
             _config = new ConfigFile();
             PrintWarning("Default configuration has been loaded.");
         }
-    
-        protected override void SaveConfig() => Config.WriteObject(_config);
+
+        protected override void SaveConfig()
+        {
+            Config.WriteObject(_config);
+        }
+
         #endregion
     }
 }

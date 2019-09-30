@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Oxide.Core;
+using Rust;
 
 namespace Oxide.Plugins
 {
@@ -8,7 +10,10 @@ namespace Oxide.Plugins
     {
         #region Hooks
 
-        private void Init() => LoadConfig();
+        private void Init()
+        {
+            LoadConfig();
+        }
 
         private void OnDispenserGather(ResourceDispenser dispenser, BasePlayer entity)
         {
@@ -18,68 +23,73 @@ namespace Oxide.Plugins
 
         private void OnEntityTakeDamage(BasePlayer entity, HitInfo info)
         {
-            if(info.Initiator?.ShortPrefabName.Contains("cactus") == false || info.damageTypes.Get(Rust.DamageType.Slash) > 0 || info.damageTypes.Get(Rust.DamageType.Bleeding) > 0) return;
+            if (info.Initiator?.ShortPrefabName.Contains("cactus") == false ||
+                info.damageTypes.Get(DamageType.Slash) > 0 || info.damageTypes.Get(DamageType.Bleeding) > 0) return;
             Hurt(entity, _config.collisionDamage, info.Initiator ?? entity);
         }
 
         private static void Hurt(BasePlayer Player, Damage Damage, BaseEntity Initiator)
         {
-            var Amount = Core.Random.Range(Damage.MinDamage, Damage.MaxDamage);
-            Player.Hurt(Amount, Rust.DamageType.Slash, Initiator);
+            var Amount = Random.Range(Damage.MinDamage, Damage.MaxDamage);
+            Player.Hurt(Amount, DamageType.Slash, Initiator);
             Player.metabolism.bleeding.value += Amount / 2;
         }
+
         #endregion
 
         #region Configuration
+
         public ConfigFile _config;
 
         public class Damage
         {
-            [JsonProperty("Min Damage")]
-            public float MinDamage;
-            [JsonProperty("Max Damage")]
-            public float MaxDamage;
+            [JsonProperty("Max Damage")] public float MaxDamage;
+
+            [JsonProperty("Min Damage")] public float MinDamage;
         }
 
         public class ConfigFile
         {
-            [JsonProperty("Harvesting Damage")]
-            public Damage harvestingDamage;
+            [JsonProperty("Collision Damage")] public Damage collisionDamage;
 
-            [JsonProperty("Collision Damage")]
-            public Damage collisionDamage;
-            public static ConfigFile DefaultConfig() => new ConfigFile()
+            [JsonProperty("Harvesting Damage")] public Damage harvestingDamage;
+
+            public static ConfigFile DefaultConfig()
             {
-                harvestingDamage = new Damage
+                return new ConfigFile
                 {
-                    MinDamage = 2f,
-                    MaxDamage = 5f
-                },
-                collisionDamage = new Damage
-                {
-                    MinDamage = 2f,
-                    MaxDamage = 5f
-                }
-            };
+                    harvestingDamage = new Damage
+                    {
+                        MinDamage = 2f,
+                        MaxDamage = 5f
+                    },
+                    collisionDamage = new Damage
+                    {
+                        MinDamage = 2f,
+                        MaxDamage = 5f
+                    }
+                };
+            }
         }
-        
+
         protected override void LoadConfig()
         {
             base.LoadConfig();
             _config = Config.ReadObject<ConfigFile>();
-            if(_config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (_config == null) LoadDefaultConfig();
         }
-    
+
         protected override void LoadDefaultConfig()
         {
             _config = ConfigFile.DefaultConfig();
             PrintWarning("Default configuration has been loaded.");
         }
 
-        protected override void SaveConfig() => Config.WriteObject(_config);
+        protected override void SaveConfig()
+        {
+            Config.WriteObject(_config);
+        }
+
         #endregion
     }
 }

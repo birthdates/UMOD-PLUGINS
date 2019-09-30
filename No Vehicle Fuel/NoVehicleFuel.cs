@@ -9,6 +9,7 @@ namespace Oxide.Plugins
     public class NoVehicleFuel : RustPlugin
     {
         #region Variables
+
         private const string permission_boat = "novehiclefuel.boat";
         private const string permission_copter = "novehiclefuel.copter";
         public static NoVehicleFuel Ins;
@@ -23,9 +24,9 @@ namespace Oxide.Plugins
 
         private class FuelVehicle : MonoBehaviour
         {
+            private StorageContainer FuelTank;
 
             private BaseEntity Vehicle;
-            private StorageContainer FuelTank;
 
             private void Awake()
             {
@@ -34,13 +35,9 @@ namespace Oxide.Plugins
                 var Boat = Vehicle as MotorRowboat;
                 var Copter = Vehicle as MiniCopter;
                 if (Boat)
-                {
                     FuelTank = Boat.fuelStorageInstance.Get(true).GetComponent<StorageContainer>();
-                }
                 else if (Copter)
-                {
                     FuelTank = Copter.fuelStorageInstance.Get(true).GetComponent<StorageContainer>();
-                }
                 else End();
                 Ins.cachedVehicles.Add(this);
                 if (Ins.cachedVehicles.Count == 1)
@@ -49,6 +46,7 @@ namespace Oxide.Plugins
                     Ins.Subscribe("OnEntityDismounted");
                     Ins.Subscribe("CanLootEntity");
                 }
+
                 if (FuelTank.inventory.GetSlot(0) == null) AddFuel();
             }
 
@@ -69,15 +67,16 @@ namespace Oxide.Plugins
                         Ins.Unsubscribe("OnEntityDismounted");
                         Ins.Unsubscribe("CanLootEntity");
                     }
-
                 }
+
                 Destroy(this);
             }
-
         }
+
         #endregion
 
         #region Hooks
+
         private void Init()
         {
             LoadConfig();
@@ -86,7 +85,10 @@ namespace Oxide.Plugins
             Ins = this;
         }
 
-        private void OnServerInitialized() => SetupMounted();
+        private void OnServerInitialized()
+        {
+            SetupMounted();
+        }
 
         private void SetupMounted()
         {
@@ -104,10 +106,7 @@ namespace Oxide.Plugins
 
         private void Unload()
         {
-            foreach (var Vehicle in cachedVehicles)
-            {
-                Vehicle.End();
-            }
+            foreach (var Vehicle in cachedVehicles) Vehicle.End();
         }
 
         private void OnEntityMounted(BaseMountable entity, BasePlayer player)
@@ -148,11 +147,12 @@ namespace Oxide.Plugins
             if (!FuelVehicle) return;
 
             FuelVehicle.AddFuel(item.amount == 0 ? 5 : item.amount);
-
         }
+
         #endregion
 
         #region Configuration & Language
+
         public ConfigFile _config;
 
         public class ConfigFile
@@ -160,9 +160,10 @@ namespace Oxide.Plugins
         {
             [JsonProperty("Disabled Vehicles (Prefab)")]
             public List<string> Disabled;
+
             public static ConfigFile DefaultConfig()
             {
-                return new ConfigFile()
+                return new ConfigFile
                 {
                     Disabled = new List<string>
                     {
@@ -176,10 +177,7 @@ namespace Oxide.Plugins
         {
             base.LoadConfig();
             _config = Config.ReadObject<ConfigFile>();
-            if (_config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (_config == null) LoadDefaultConfig();
         }
 
         protected override void LoadDefaultConfig()
@@ -192,6 +190,7 @@ namespace Oxide.Plugins
         {
             Config.WriteObject(_config);
         }
+
         #endregion
     }
 }

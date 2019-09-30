@@ -8,32 +8,32 @@ namespace Oxide.Plugins
     [Description("Disables the spawning of NPCs")]
     public class AntiNPC : RustPlugin
     {
-
         #region Hooks
-        private void Init() => LoadConfig();
 
-        private void OnServerInitialized() => Cleanup();
+        private void Init()
+        {
+            LoadConfig();
+        }
+
+        private void OnServerInitialized()
+        {
+            Cleanup();
+        }
 
         private void Cleanup()
         {
-            foreach (var Entity in BaseNetworkable.serverEntities.ToList().Where(Entity => (Entity as BaseNpc != null || Entity as NPCPlayer != null) && !_config.Whitelist.Contains(Entity.PrefabName)))
-            {
-                Entity.Kill();
-            }
+            foreach (var Entity in BaseNetworkable.serverEntities.ToList().Where(Entity =>
+                (Entity as BaseNpc != null || Entity as NPCPlayer != null) &&
+                !_config.Whitelist.Contains(Entity.PrefabName))) Entity.Kill();
         }
 
         private void OnEntitySpawned(BaseNetworkable entity)
         {
-            if (!(entity is BaseNpc) && !(entity is NPCPlayer) || _config.Whitelist.Contains(entity.PrefabName))
-            {
-                return;
-            }
+            if (!(entity is BaseNpc) && !(entity is NPCPlayer) || _config.Whitelist.Contains(entity.PrefabName)) return;
             //Next Tick for parenting, e.t.c
-            NextTick(() =>
-            {
-                entity.Kill();
-            });
+            NextTick(() => { entity.Kill(); });
         }
+
         #endregion
 
         #region Configuration & Language
@@ -44,9 +44,10 @@ namespace Oxide.Plugins
         {
             [JsonProperty("Whitelisted NPCS (Prefab)")]
             public List<string> Whitelist;
+
             public static ConfigFile DefaultConfig()
             {
-                return new ConfigFile()
+                return new ConfigFile
                 {
                     Whitelist = new List<string>
                     {
@@ -60,10 +61,7 @@ namespace Oxide.Plugins
         {
             base.LoadConfig();
             _config = Config.ReadObject<ConfigFile>();
-            if (_config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (_config == null) LoadDefaultConfig();
         }
 
         protected override void LoadDefaultConfig()
@@ -76,6 +74,7 @@ namespace Oxide.Plugins
         {
             Config.WriteObject(_config);
         }
+
         #endregion
     }
 }

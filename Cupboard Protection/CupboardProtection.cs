@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
-using Oxide.Core;
 using Newtonsoft.Json;
+using Oxide.Core;
+using UnityEngine;
 
 namespace Oxide.Plugins
 {
     [Info("CupboardProtection", "Wulf/lukespragg and birthdates", "1.5.1")]
     [Description("Makes cupboards and their foundations invulnerable, unable to be destroyed.")]
-
     public class CupboardProtection : RustPlugin
     {
         private readonly int Mask = LayerMask.GetMask("Construction");
@@ -19,14 +18,13 @@ namespace Oxide.Plugins
         {
             var Initiator = info.Initiator;
             if (!Initiator) return null;
-            
-            if (entity.name.Contains("cupboard"))
-            {
-                return CHook("CanDamageTc", Initiator, entity);
-            }
+
+            if (entity.name.Contains("cupboard")) return CHook("CanDamageTc", Initiator, entity);
 
             if (!Configuration.foundation || !entity.name.Contains("foundation")) return null;
-            return IDData.IDs.Values.ToList().Exists(id => id == entity.net.ID) ? CHook("CanDamageTcFloor", Initiator, entity) : null;
+            return IDData.IDs.Values.ToList().Exists(id => id == entity.net.ID)
+                ? CHook("CanDamageTcFloor", Initiator, entity)
+                : null;
         }
 
         private static object CHook(string Name, BaseEntity Player, DecayEntity Entity)
@@ -43,10 +41,14 @@ namespace Oxide.Plugins
                 Unsubscribe("OnEntityBuilt");
                 Unsubscribe("OnEntityKill");
             }
+
             IDData = Interface.Oxide.DataFileSystem.ReadObject<Data>(Name);
         }
 
-        private void Unload() => SaveData();
+        private void Unload()
+        {
+            SaveData();
+        }
 
         private void OnEntityBuilt(Planner plan, GameObject go)
         {
@@ -57,18 +59,21 @@ namespace Oxide.Plugins
             IDData.IDs.Add(Priv.net.ID, Foundation.net.ID);
         }
 
-        private BuildingBlock GetFoundation(BuildingPrivlidge Priv) => Physics.RaycastAll(Priv.transform.position, Vector3.down, 2f, Mask, QueryTriggerInteraction.Ignore).Select(Hit => Hit.GetEntity() as BuildingBlock).FirstOrDefault(E => E);
+        private BuildingBlock GetFoundation(BuildingPrivlidge Priv)
+        {
+            return Physics.RaycastAll(Priv.transform.position, Vector3.down, 2f, Mask, QueryTriggerInteraction.Ignore)
+                .Select(Hit => Hit.GetEntity() as BuildingBlock).FirstOrDefault(E => E);
+        }
 
         private void OnEntityKill(BuildingPrivlidge entity)
         {
-            if (IDData.IDs.ContainsKey(entity.net.ID))
-            {
-                IDData.IDs.Remove(entity.net.ID);
-            }
+            if (IDData.IDs.ContainsKey(entity.net.ID)) IDData.IDs.Remove(entity.net.ID);
         }
+
         #endregion
 
         #region Data
+
         private Data IDData;
 
         private class Data
@@ -80,6 +85,7 @@ namespace Oxide.Plugins
         {
             Interface.Oxide.DataFileSystem.WriteObject(Name, IDData);
         }
+
         #endregion
 
         #region Configuration
@@ -88,13 +94,12 @@ namespace Oxide.Plugins
 
         public class ConfigFile
         {
-
             [JsonProperty("Foundation Invincible?")]
             public bool foundation;
 
             public static ConfigFile DefaultConfig()
             {
-                return new ConfigFile()
+                return new ConfigFile
                 {
                     foundation = true
                 };
@@ -105,10 +110,7 @@ namespace Oxide.Plugins
         {
             base.LoadConfig();
             Configuration = Config.ReadObject<ConfigFile>();
-            if (Config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (Config == null) LoadDefaultConfig();
         }
 
         protected override void LoadDefaultConfig()
@@ -121,6 +123,7 @@ namespace Oxide.Plugins
         {
             Config.WriteObject(Configuration);
         }
+
         #endregion
     }
 }

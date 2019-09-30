@@ -8,7 +8,11 @@ namespace Oxide.Plugins
     public class CrateFix : RustPlugin
     {
         #region Hooks
-        private void Init() => LoadConfig();
+
+        private void Init()
+        {
+            LoadConfig();
+        }
 
         private object CanAcceptItem(ItemContainer container, Item item, int targetPos)
         {
@@ -21,18 +25,21 @@ namespace Oxide.Plugins
             Player.ChatMessage(lang.GetMessage("CannotSwap", this, Player.UserIDString));
             return ItemContainer.CanAcceptResult.CannotAcceptRightNow;
         }
+
         #endregion
 
         #region Configuration & Language
+
         public ConfigFile _config;
 
         public class ConfigFile
         {
             [JsonProperty("Disabled Crates (Prefab)")]
             public List<string> DisabledCrates;
+
             public static ConfigFile DefaultConfig()
             {
-                return new ConfigFile()
+                return new ConfigFile
                 {
                     DisabledCrates = new List<string>
                     {
@@ -46,7 +53,7 @@ namespace Oxide.Plugins
         {
             lang.RegisterMessages(new Dictionary<string, string>
             {
-                {"CannotSwap", "You cannot swap that item."},
+                {"CannotSwap", "You cannot swap that item."}
             }, this);
         }
 
@@ -55,10 +62,7 @@ namespace Oxide.Plugins
         {
             base.LoadConfig();
             _config = Config.ReadObject<ConfigFile>();
-            if (_config == null)
-            {
-                LoadDefaultConfig();
-            }
+            if (_config == null) LoadDefaultConfig();
         }
 
         protected override void LoadDefaultConfig()
@@ -71,6 +75,7 @@ namespace Oxide.Plugins
         {
             Config.WriteObject(_config);
         }
+
         #endregion
     }
 }
