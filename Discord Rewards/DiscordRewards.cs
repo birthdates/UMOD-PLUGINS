@@ -18,7 +18,7 @@ namespace Oxide.Plugins
         #region Variables
         [DiscordClient] DiscordClient Client;
         private Role role;
-        private string Perm = "discordrewards.use";
+        private const string Perm = "discordrewards.use";
         private Data data;
         #endregion
 
@@ -31,7 +31,7 @@ namespace Oxide.Plugins
             AddCovalenceCommand(_config.command, "ChatCMD");
         }
 
-        void OnServerInitialized()
+        private void OnServerInitialized()
         {
             try
             {
@@ -42,9 +42,10 @@ namespace Oxide.Plugins
                 PrintError("Too many bots open!");
             }
         }
-        void Discord_Ready(Ready ready) => role = Client?.DiscordServer?.roles?.Find(a => a.id.Equals(_config.role) || a.name.Equals(_config.role));
 
-        void ChatCMD(IPlayer player, string command, string[] args)
+        private void Discord_Ready(Ready ready) => role = Client?.DiscordServer?.roles?.Find(a => a.id.Equals(_config.role) || a.name.Equals(_config.role));
+
+        private void ChatCMD(IPlayer player, string command, string[] args)
         {
             if (!permission.UserHasPermission(player.Id, Perm))
             {
@@ -66,7 +67,7 @@ namespace Oxide.Plugins
             data.codes.Add(code, player.Id);
             player.Message(string.Format(lang.GetMessage("Verify", this, player.Id), code));
         }
-        private System.Random random = new System.Random();
+        private readonly System.Random random = new System.Random();
         public string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
@@ -75,7 +76,7 @@ namespace Oxide.Plugins
         }
 
 
-        void DiscordSocket_Initialized()
+        private void DiscordSocket_Initialized()
         {
             if (Client == null)
             {
@@ -85,7 +86,7 @@ namespace Oxide.Plugins
             Puts("Discord bot connected!");
         }
 
-        void Discord_MessageCreate(Message message)
+        private void Discord_MessageCreate(Message message)
         {
             if (message.author.bot == true) return;
             Channel.GetChannel(Client, message.channel_id, c =>
@@ -102,22 +103,22 @@ namespace Oxide.Plugins
                 message.Reply(Client, lang.GetMessage("NotAValidCode", this));
                 return;
             }
-                var p = players.FindPlayer(data.codes[message.content]);
-                data.verified.Add(p.Id);
-                data.verified2.Add(message.author.id);
-                foreach (var s in _config.commands)
-                {
-                    server.Command(string.Format(s, p.Id));
-                }
-                message.Reply(Client, lang.GetMessage("Success", this));
-                data.codes.Remove(message.content);
-                p.Message(lang.GetMessage("VerifiedInGame", this, p.Id));
-                SaveData();
-                if(role != null) Client.DiscordServer.AddGuildMemberRole(Client, message.author.id, role.id);
+            var p = players.FindPlayer(data.codes[message.content]);
+            data.verified.Add(p.Id);
+            data.verified2.Add(message.author.id);
+            foreach (var s in _config.commands)
+            {
+                server.Command(string.Format(s, p.Id));
+            }
+            message.Reply(Client, lang.GetMessage("Success", this));
+            data.codes.Remove(message.content);
+            p.Message(lang.GetMessage("VerifiedInGame", this, p.Id));
+            SaveData();
+            if(role != null) Client.DiscordServer.AddGuildMemberRole(Client, message.author.id, role.id);
             });
         }
 
-        void Unload()
+        private void Unload()
         {
             Discord.CloseClient(Client);
             SaveData();
@@ -142,10 +143,7 @@ namespace Oxide.Plugins
             }, this);
         }
 
-        void SaveData()
-        {
-            Interface.Oxide.DataFileSystem.WriteObject("Discord Rewards", data);
-        }
+        private void SaveData() => Interface.Oxide.DataFileSystem.WriteObject("Discord Rewards", data);
 
         public class Data
         {
