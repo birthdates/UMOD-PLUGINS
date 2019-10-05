@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Custom UI", "birthdates", "1.1.2")]
+    [Info("Custom UI", "birthdates", "1.1.3")]
     [Description("Create your custom user interface without code!")]
     public class CustomUI : RustPlugin
     {
@@ -52,20 +52,22 @@ namespace Oxide.Plugins
 
         #region Commands
 
-        [ConsoleCommand("OpenUI")]
+        [ConsoleCommand("CustomUI.OpenUI")]
         private void OpenUICommand(ConsoleSystem.Arg Arg)
         {
-            if (Arg.Player() == null || !Arg.Player().IPlayer.HasPermission(PermissionOpenUI) ||
+            var Player = Arg.Player();
+            if (Player == null || !Player.IPlayer.HasPermission(PermissionOpenUI) ||
                 (Arg.Args?.Length ?? 0) == 0) return;
-            OpenUI(Arg.Player(), Arg.Args[0]);
+            OpenUI(Player, Arg.Args[0]);
         }
 
-        [ConsoleCommand("CloseUI")]
+        [ConsoleCommand("CustomUI.CloseUI")]
         private void CloseUICommand(ConsoleSystem.Arg Arg)
         {
-            if (Arg.Player() == null || !Arg.Player().IPlayer.HasPermission(PermissionCloseUI) ||
+            var Player = Arg.Player();
+            if (Player|| !Player.IPlayer.HasPermission(PermissionCloseUI) ||
                 Arg.Args?.Length == 0) return;
-            CuiHelper.DestroyUi(Arg.Player(), Arg.Args[0]);
+            CuiHelper.DestroyUi(Player, Arg.Args[0]);
         }
 
         #endregion
@@ -312,7 +314,7 @@ namespace Oxide.Plugins
         /// </summary>
         /// <param name="Target">Target Player</param>
         /// <param name="UIName">UI Name</param>
-        /// <param name="UI">Used if you've already found UI (saves performance)'</param>
+        /// <param name="UI">Used if you've already found UI (saves performance)</param>
         private void OpenUI(BasePlayer Target, string UIName, UI UI = null)
         {
             if (UI == null && !Config.UIs.TryGetValue(UIName, out UI)) return;
