@@ -12,7 +12,7 @@ using Random = System.Random;
 
 namespace Oxide.Plugins
 {
-    [Info("Discord Rewards", "birthdates", "1.1.5git")]
+    [Info("Discord Rewards", "birthdates", "1.1.5")]
     [Description("Get rewards for joining a discord!")]
     public class DiscordRewards : CovalencePlugin
     {
