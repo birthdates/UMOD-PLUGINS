@@ -33,6 +33,14 @@ namespace Oxide.Plugins
             data = Interface.Oxide.DataFileSystem.ReadObject<Data>("Discord Rewards");
             permission.RegisterPermission(Perm, this);
             AddCovalenceCommand(_config.command, "ChatCMD");
+            if (!_config.Wipe) Unsubscribe("OnNewSave");
+        }
+
+        private void OnNewSave()
+        {
+            data = new Data();
+            SaveData();
+            PrintWarning("All verification data wiped.");
         }
 
         private void OnServerInitialized()
@@ -184,6 +192,9 @@ namespace Oxide.Plugins
             [JsonProperty("Verification Role (role given when verified)")]
             public string role;
 
+            [JsonProperty("Erase all verification data on wipe (new map save)?")]
+            public bool Wipe;
+
             public static ConfigFile DefaultConfig()
             {
                 return new ConfigFile
@@ -195,7 +206,8 @@ namespace Oxide.Plugins
                     {
                         "inventory.giveto {0} stones 1000"
                     },
-                    codeLength = 6
+                    codeLength = 6,
+                    Wipe = false
                 };
             }
         }
