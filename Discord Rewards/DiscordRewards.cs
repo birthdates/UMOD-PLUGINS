@@ -90,8 +90,7 @@ namespace Oxide.Plugins
 
         public string RandomString(int length)
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
-            return new string(Enumerable.Repeat(chars, length)
+            return new string(Enumerable.Repeat(_config.CharSet, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
@@ -194,6 +193,9 @@ namespace Oxide.Plugins
 
             [JsonProperty("Erase all verification data on wipe (new map save)?")]
             public bool Wipe;
+            
+            [JsonProperty("Code character set (code will be generated randomly with these characters)")]
+            public string CharSet;
 
             public static ConfigFile DefaultConfig()
             {
@@ -207,6 +209,7 @@ namespace Oxide.Plugins
                         "inventory.giveto {0} stones 1000"
                     },
                     codeLength = 6,
+                    CharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz",
                     Wipe = false
                 };
             }
