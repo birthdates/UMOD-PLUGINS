@@ -53,6 +53,11 @@ namespace Oxide.Plugins
             };
         }
 
+        private void OnServerInitialized()
+        {
+            ItemManager.bpList.ForEach(item => item.time /= 3);
+        }
+
         private void OnLootEntity(BasePlayer player, StorageContainer entity)
         {
             if (!(entity is BoxStorage)) return;
