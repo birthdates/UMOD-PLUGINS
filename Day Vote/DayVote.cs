@@ -34,8 +34,7 @@ namespace Oxide.Plugins
 
         private int VotesNeeded;
         private readonly List<ulong> Voters = new List<ulong>();
-
-        private bool Night;
+        
 
         #endregion
 
@@ -60,13 +59,10 @@ namespace Oxide.Plugins
         private void OnDay()
         {
             Voters.Clear();
-            Night = false;
         }
 
         private void OnNight()
         {
-            if (Night) return;
-            Night = true;
             VotesNeeded = BasePlayer.activePlayerList.Count > 1 ? BasePlayer.activePlayerList.Count / 2 : 1;
             BasePlayer.activePlayerList.ForEach(Player =>
                 Player.ChatMessage(string.Format(lang.GetMessage("VoteDay", this, Player.UserIDString), VotesNeeded)));
@@ -75,7 +71,7 @@ namespace Oxide.Plugins
         [ChatCommand("voteday")]
         private void ChatCommand(BasePlayer Player, string Label, string[] Args)
         {
-            if (!Night)
+            if (TOD_Sky.Instance.IsDay)
             {
                 Player.ChatMessage(lang.GetMessage("NotNight", this, Player.UserIDString));
                 return;
