@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("RocketFire", "birthdates", "1.0.0")]
+    [Info("RocketFire", "birthdates", "1.0.1")]
     [Description("Ability to fire x amount of rockets at once")]
     public class RocketFire : RustPlugin
     {
@@ -17,7 +17,6 @@ namespace Oxide.Plugins
         {
             permission.RegisterPermission(Perm, this);
             LoadConfig();
-            cmd.AddChatCommand("fr", this, FireRocketsCMD);
         }
 
         [ConsoleCommand("fr")]
@@ -29,6 +28,7 @@ namespace Oxide.Plugins
             FRCommand(player, args);
         }
 
+        [ChatCommand("fr")]
         private void FireRocketsCMD(BasePlayer player, string command, string[] args) => FRCommand(player, args);
 
         private void FRCommand(BasePlayer player, string[] args)
@@ -64,15 +64,17 @@ namespace Oxide.Plugins
                         SendReply(player, lang.GetMessage("InvalidPrefab", this, player.UserIDString));
                         return;
                     }
+                    
                     var pos = player.eyes.position;
                     var forward = player.eyes.HeadForward();
                     var rot = player.transform.rotation;
                     var aim = player.serverInput.current.aimAngles;
+                    
                     timer.Repeat(_config.delay, amount, delegate
                     {
                         
                         var rocket = GameManager.server.CreateEntity($"assets/prefabs/ammo/rocket/{_config.rocketType}.prefab",
-                           _config.staticRockets ? pos + forward : player.eyes.position + player.eyes.HeadForward(), _config.staticRockets ? rot : player.transform.rotation, true);
+                           _config.staticRockets ? pos + forward : player.eyes.position + player.eyes.HeadForward(), _config.staticRockets ? rot : player.transform.rotation);
                        
                         var proj = rocket.GetComponent<ServerProjectile>();
                         proj.InitializeVelocity(Quaternion.Euler(_config.staticRockets ? aim : player.serverInput.current.aimAngles) * rocket.transform.forward * _config.velocity);
