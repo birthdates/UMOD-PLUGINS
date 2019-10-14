@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using Oxide.Game.Rust.Cui;
 using UnityEngine;
@@ -60,7 +61,7 @@ namespace Oxide.Plugins
 
         private void OnLootEntity(BasePlayer player, StorageContainer entity)
         {
-            if (!(entity is BoxStorage)) return;
+            if (!(entity is BoxStorage) || _config.Blocked.Contains(entity.ShortPrefabName) || _config.Blocked.Contains(entity.PrefabName)) return;
             OpenUI(player);
         }
 
@@ -117,6 +118,7 @@ namespace Oxide.Plugins
         {
             [JsonProperty("UI Settings")] public UI Ui;
 
+            [JsonProperty("Blocked Items (short or long prefabs accepted)")] public List<string> Blocked;
             public static ConfigFile Default()
             {
                 return new ConfigFile
@@ -129,6 +131,10 @@ namespace Oxide.Plugins
                         FontSize = 13,
                         Text = "Sort",
                         TextColor = "#A5BA7A"
+                    },
+                    Blocked = new List<string>()
+                    {
+                        "locker.deployed"
                     }
                 };
             }

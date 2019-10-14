@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("RocketFire", "birthdates", "1.0.1")]
+    [Info("Rocket Fire", "birthdates", "1.0.2")]
     [Description("Ability to fire x amount of rockets at once")]
     public class RocketFire : RustPlugin
     {
@@ -75,8 +75,9 @@ namespace Oxide.Plugins
                         
                         var rocket = GameManager.server.CreateEntity($"assets/prefabs/ammo/rocket/{_config.rocketType}.prefab",
                            _config.staticRockets ? pos + forward : player.eyes.position + player.eyes.HeadForward(), _config.staticRockets ? rot : player.transform.rotation);
-                       
+                        if (rocket == null) return;
                         var proj = rocket.GetComponent<ServerProjectile>();
+                        if (proj == null) return;
                         proj.InitializeVelocity(Quaternion.Euler(_config.staticRockets ? aim : player.serverInput.current.aimAngles) * rocket.transform.forward * _config.velocity);
 
                         rocket.Spawn();
